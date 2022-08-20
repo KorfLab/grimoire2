@@ -7,19 +7,19 @@ import (
 
 // By default, I am exporting all fields in Feature
 type Feature struct {
-	Dna      *DNA
-	Beg      int
-	End      int
-	Len      int
-	Strand	 byte
-	Type	   string // Should be SO-compliant
-	Phase    byte
-	Score    float64 // need a representative of . scores, floatMAX?
-	Source   string
-	Issues  *Issues
-	Parent	*Feature
-	Children []*Feature //what type is this?
-	validated    bool
+	Dna       *DNA
+	Beg       int
+	End       int
+	Len       int
+	Strand    byte
+	Type      string // Should be SO-compliant
+	Phase     byte
+	Score     float64 // need a representative of . scores, floatMAX?
+	Source    string
+	Issues    *Tracker
+	Parent    *Feature
+	Children  []*Feature //what type is this?
+	validated bool
 }
 
 // NewFeature creates a pointer to an empty Feature object, with each fields
@@ -33,9 +33,10 @@ func NewFeature() *Feature {
 	feat.Len = 0 //do we even need this? its easy to calculate
 	feat.Strand = byte(".")
 	feat.Type = ""
-	feat.Phase = "."
+	feat.Phase = byte(".")
 	feat.Score = math.maxFloat64
 	feat.Source = ""
+	feat.Issues = nil
 	feat.Parent = nil
 	feat.Children = nil
 	feat.validated = false
@@ -44,29 +45,71 @@ func NewFeature() *Feature {
 }
 
 // validate() method checks internal values of Features and sets validated to
-// true if the values are legal
+// true if the values are legal (incomplete)
 func (f Feature) validate() {
+	errors := []Issue
 	if f.Beg < 1 {
-		f.Issues
-		//panic("Error: beg<1")
+		errors += beg_oob
+
 	} else if f.Beg > f.End {
-		f.Issues //do something
-		panic("Error: beg>End")
+		errors += bad_coordinates
+
 	} else if len == 0 { //see comment above
-		panic("Error: Len = 0")
+		errors += zero_len
+
+	}
+
+	if errors != nil && f.Issues == nil {
+		f.Issues = NewTracker(feat)
+	}
+
+	if errors != nil {
+		f.Issues.Raised = append(f.Issues.Raised, errors)
 	}
 }
 
 func (f Feature) revcomp() {
-	if self.strand == byte("+") {
-		self.strand = byte("-")
-	} else if self.strand == byte("-") {
-		self.strand = byte("+")
+	if f.strand == byte("+") {
+		f.strand = byte("-")
+	} else if f.strand == byte("-") {
+		f.strand = byte("+")
 	}
 
-//	newbeg =
+	newbeg = len(f.Dna.seq) - f.End + 1
+	newend = len(f.Dna.seq) - f.Beg + 1
+	f.Beg = newbeg
+	f.End = newend
 }
 
-type Issues struct {
-	//this could be an empty slice of type issue, append to it for each Issues
+type Tracker struct {
+	Raised []Issue
+	Feature *Feature
+}
+
+func NewTracker (f *Feature) *Tracker {
+	t = new(Tracker)
+	t.Raised = []Issue
+	t.Feature = f
+
+	return t
+}
+
+type Issue int64
+
+const (
+	beg_oob Issue = iota
+	bad_coordinates
+	zero_len
+	nonCDS_phase
+	incorrect_phase
+	nonSO_type
+	unexpected_value
+	all_Ns
+	feature_size
+	exon_overlap
+	child_oob
+)
+
+func (i Tracker) addissue(Issue) {
+	i.Issues += Issue
 }
