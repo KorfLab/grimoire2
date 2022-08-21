@@ -1,6 +1,9 @@
+// Package toolbox implements miscellaneous functions for operating on numbers, strings, and such
 package toolbox
 
 import (
+	"time"
+	"math/rand"
 	"errors"
 	"strings"
 )
@@ -120,14 +123,51 @@ func Translate_str(seq string) string {
 	return strings.Join(pro, "")
 }
 
-func Longest_orf(seq string) string {
-	
+func Longest_orf(seq string) (string, int) {
+	longest_orf := ""
+	longest_orf_start := -1
 	for f := 0; f < 3; f++ {
-		pro := Translate_str(seq)
+		pro := Translate_str(seq[f:])
 		start := 0
-		stop := 0
 		for start < len(pro) {
-			
+			end := 0
+			if string(pro[start]) == "M" {
+				for i, aa := range pro[start+1:] {
+					if string(aa) == "*" {
+						end = i + start + 1
+						break
+					}
+				}
+			}
+			if end != 0 && len(pro[start:end]) > len(longest_orf) {
+				longest_orf = pro[start:end]
+				longest_orf_start = start * 3 + f
+			}
+			start += 1
 		}
 	}
+	
+	return longest_orf, longest_orf_start
+}
+
+func Random_dna(length int, a float64, c float64, g float64, t float64) string {
+	if a + c + g + t - 1.0 > 0.00001 {
+		err := errors.New("error: sequence probabilities must add up to 1.0")
+		panic(err)
+	}
+	rand.Seed(time.Now().UnixNano())
+	seq := make([]string, length)
+	for i := 0; i < length; i++ {
+		rf := rand.Float64()
+		if rf < a {
+			seq[i] = "A"
+		} else if rf < a + c {
+			seq[i] = "C"
+		} else if rf < a + c + g {
+			seq[i] = "G"
+		} else {
+			seq[i] = "T"
+		}
+	}
+	return strings.Join(seq,"")
 }
