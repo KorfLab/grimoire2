@@ -3,11 +3,40 @@ package toolbox
 
 import (
 	"time"
+	"math"
 	"math/rand"
-	"errors"
+	"fmt"
 	"strings"
 )
 
+func Prod[Num int | float64](iterable []Num) Num {
+	var a Num = 1
+	
+	for _, num := range iterable {
+		a *= num
+	}
+	
+	return a
+
+}
+
+func Log(p float64) float64 {
+	if p < 0 {
+		err := fmt.Errorf("error: p < 0: %f", p)
+		panic(err)
+	}
+	
+	if p == 0 {
+		return -999
+	} else {
+		return math.Log(p)
+	}
+}
+
+func Sumlog(v1 float64, v2 float64) float64 {
+	s := math.Exp(v1) + math.Exp(v2)
+	return math.Log(s)
+}
 
 func _kmers(seq []string, table *map[string]int, key string, n int, k int, v int) {
 	if k == 0 {
@@ -31,7 +60,7 @@ func Generate_kmers(seq_type string, k int, pseudo int) map[string]int{
 						"P", "V", "I", "C", "Y", "H", "R", "N", "D", "T"}
 		_kmers(seq, &table, "", 20, k, pseudo)
 	} else {
-		err := errors.New("error: seq_type expects only \"nt\" or \"aa\"")
+		err := fmt.Errorf("error: seq_type received \"%s\"; expects \"nt\" or \"aa\"", seq_type)
 		panic(err)
 	}
 	
@@ -152,7 +181,7 @@ func Longest_orf(seq string) (string, int) {
 
 func Random_dna(length int, a float64, c float64, g float64, t float64) string {
 	if a + c + g + t - 1.0 > 0.00001 {
-		err := errors.New("error: sequence probabilities must add up to 1.0")
+		err := fmt.Errorf("error: sequence probabilities must add up to 1.0")
 		panic(err)
 	}
 	rand.Seed(time.Now().UnixNano())
