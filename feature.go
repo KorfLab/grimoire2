@@ -49,20 +49,22 @@ func NewFeature() *Feature {
 func (f Feature) validate() {
 	errors := []Issue
 	if f.Beg < 1 {
-		errors += beg_oob
+		errors = append(errors, beg_oob)
 
 	} else if f.Beg > f.End {
-		errors += bad_coordinates
+		errors = append(errors, bad_coordinates)
 
 	} else if len == 0 { //see comment above
-		errors += zero_len
+		errors = append(errors, zero_len)
 
 	}
 
+	// If these are the first issues, make a tracker for them
 	if errors != nil && f.Issues == nil {
-		f.Issues = NewTracker(feat)
+		f.Issues = NewTracker(f)
 	}
 
+	// Append our errors slice to the end of the existing Issues.Raised slice
 	if errors != nil {
 		f.Issues.Raised = append(f.Issues.Raised, errors)
 	}
