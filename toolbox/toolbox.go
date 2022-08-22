@@ -38,33 +38,33 @@ func Sumlog(v1 float64, v2 float64) float64 {
 	return math.Log(s)
 }
 
-func _kmers(seq []string, table *map[string]int, key string, n int, k int, v int) {
+func _kmers(letters []string, kmers *[]string, key string, n int, k int) {
 	if k == 0 {
-		(*table)[key] = v
+		*kmers = append(*kmers, key)
 		return
 	}
 	
 	for i := 0; i < n; i++ {
-		t := key + seq[i]
-		_kmers(seq, table, t, n, k-1,v)
+		t := key + letters[i]
+		_kmers(letters, kmers, t, n, k-1)
 	}
 }
 
-func Generate_kmers(seq_type string, k int, pseudo int) map[string]int{
-	table := make(map[string]int)
+func Generate_kmers(seq_type string, k int) []string {
+	kmers := make([]string, 0)
 	if seq_type == "nt" {
-		seq := []string{"A", "C", "G", "T"}
-		_kmers(seq, &table, "", 4, k, pseudo)
+		letters := []string{"A", "C", "G", "T"}
+		_kmers(letters, &kmers, "", 4, k)
 	} else if seq_type == "aa" {
-		seq := []string{"G", "A", "L", "M", "F", "W", "K", "Q", "E", "S",
+		letters := []string{"G", "A", "L", "M", "F", "W", "K", "Q", "E", "S",
 						"P", "V", "I", "C", "Y", "H", "R", "N", "D", "T"}
-		_kmers(seq, &table, "", 20, k, pseudo)
+		_kmers(letters, &kmers, "", 20, k)
 	} else {
 		err := fmt.Errorf("error: seq_type received \"%s\"; expects \"nt\" or \"aa\"", seq_type)
 		panic(err)
 	}
 	
-	return table
+	return kmers
 }
 
 var CODONS = map[string]string {
