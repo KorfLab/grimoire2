@@ -1,6 +1,7 @@
 package toolbox
 
 import (
+	"strings"
 	"testing"
 	"math"
 )
@@ -103,24 +104,93 @@ func Test_Sumlog(t *testing.T) {
 	}
 }
 
-/*
-func Test_Generate_kmers(t *testing.T) {
 
+func Test_Generate_kmers(t *testing.T) {
+	Generate_kmers_tests := map[string]struct {
+		input1 string 
+		input2 int
+		output string
+	} {
+		"k = 1": {
+			input1: "nt",
+			input2: 1,
+			output: "ACGT",
+		},
+		"k = 2": {
+			input1: "nt",
+			input2: 2,
+			output: "AAACAGATCACCCGCTGAGCGGGTTATCTGTT",
+		},
+	}
+	
+	for name, test := range Generate_kmers_tests {
+		test := test
+		t.Run(name, func(t *testing.T){
+			//t.Parallel()
+			out := Generate_kmers(test.input1, test.input2)
+			if got, expected := strings.Join(out,""), test.output; got != expected {
+				t.Errorf("Generate_kmers(%s, %d) returned %s; expected %s\n", test.input1,
+				test.input2, got, expected)
+			} 
+		})
+	}
 }
+
+
 
 func Test_Revcomp_str(t *testing.T) {
+	RevComp_str_tests := map[string]struct {
+		input string
+		output string
+	}  {
+		"empty seq": {
+			input: "",
+			output: "",
+		},
+		"1 nt seq": {
+			input: "A",
+			output: "T",
+		},
+		"long seq": {
+			input: "GTAAGTTTCAG",
+			output: "CTGAAACTTAC",
+		},
+	}
+	
+	for name, test := range RevComp_str_tests {
+		test := test
+		t.Run(name, func(t *testing.T){
+			if got, expect := Revcomp_str(test.input), test.output; got != expect {
+				t.Errorf("Revcomp_str(%s) returned %s; expected %s \n", test.input, got, expect)
+			}
+		})
+	}
 
 }
+
 
 func Test_Translate_str(t *testing.T) {
-
+	Translate_str_tests := map[string]struct {
+		input string
+		output string
+	} {
+		"Spell ALAN": {
+			input: "GCCCTTGCTAAT",
+			output: "ALAN",
+		},
+		"Speal PASSTEST": {
+			input: "CCTGCATCTTCCACTGAAAGCACT",
+			output: "PASSTEST",
+		},
+	}
+	
+	for name, test := range Translate_str_tests {
+		test := test
+		t.Run(name, func(t *testing.T){
+			if got, expect := Translate_str(test.input), test.output; got != expect {
+				t.Errorf("Revcomp_str(%s) returned %s; expected %s \n", test.input, got, expect)
+			}
+		})
+	}
 }
 
-func Test_Longest_orf(t *testing.T) {
-
-}
-
-func Test_Random_dna(t *testing.T) {
-
-}
-*/
