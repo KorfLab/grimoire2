@@ -1,24 +1,26 @@
 package classes
 
 import (
-	"errors"
+	//"errors"
 	"math"
 )
 
 // By default, I am exporting all fields in Feature
 type Feature struct {
 	Dna       *DNA
-	Beg       int
-	End       int
-	Len       int
+	Seqid			string
+	Source    string
+	Beg       int64
+	End       int64
 	Strand    byte
 	Type      string // Should be SO-compliant
 	Phase     byte
 	Score     float64 // need a representative of . scores, floatMAX?
-	Source    string
-	Issues    *Tracker
-	Parent    *Feature
+	ID				string
+	Parent    string//*Feature
+	Len       int64
 	Children  []*Feature //what type is this?
+	Issues    *Tracker
 	validated bool
 }
 
@@ -26,19 +28,21 @@ type Feature struct {
 // initialized to default zero values. User must specify values their feature
 // will have.
 func NewFeature() *Feature {
-	feat = new(Feature)
-	feat.DNA = nil
+	feat := new(Feature)
+	feat.Dna = nil
+	feat.Seqid = ""
+	feat.Source = ""
+	feat.Type = ""
 	feat.Beg = -1
 	feat.End = -1
+	feat.Score = math.MaxFloat64
+	feat.Strand = '.'
+	feat.Phase = '.'
+	feat.ID = ""
+	feat.Parent = ""//nil
 	feat.Len = 0 //do we even need this? its easy to calculate
-	feat.Strand = byte(".")
-	feat.Type = ""
-	feat.Phase = byte(".")
-	feat.Score = math.maxFloat64
-	feat.Source = ""
-	feat.Issues = nil
-	feat.Parent = nil
 	feat.Children = nil
+	feat.Issues = nil
 	feat.validated = false
 
 	return feat
@@ -46,15 +50,15 @@ func NewFeature() *Feature {
 
 // validate() method checks internal values of Features and sets validated to
 // true if the values are legal (incomplete)
-func (f Feature) validate() {
-	errors := []Issue
+func (f *Feature) validate() {
+	var errors []Issue
 	if f.Beg < 1 {
 		errors = append(errors, beg_oob)
 
 	} else if f.Beg > f.End {
 		errors = append(errors, bad_coordinates)
 
-	} else if len == 0 { //see comment above
+	} else if f.Len == 0 { //see comment above
 		errors = append(errors, zero_len)
 
 	}
@@ -66,19 +70,19 @@ func (f Feature) validate() {
 
 	// Append our errors slice to the end of the existing Issues.Raised slice
 	if errors != nil {
-		f.Issues.Raised = append(f.Issues.Raised, errors)
+		f.Issues.Raised = append(f.Issues.Raised, errors...)
 	}
 }
 
-func (f Feature) revcomp() {
-	if f.strand == byte("+") {
-		f.strand = byte("-")
-	} else if f.strand == byte("-") {
-		f.strand = byte("+")
+func (f *Feature) revcomp() {
+	if f.Strand == '+' {
+		f.Strand = '-'
+	} else if f.Strand == '-' {
+		f.Strand = '+'
 	}
 
-	newbeg = len(f.Dna.seq) - f.End + 1
-	newend = len(f.Dna.seq) - f.Beg + 1
+ 	newbeg := int64(len(f.Dna.Seq)) - f.End + 1
+	newend := int64(len(f.Dna.Seq)) - f.Beg + 1
 	f.Beg = newbeg
 	f.End = newend
 }
@@ -89,8 +93,8 @@ type Tracker struct {
 }
 
 func NewTracker (f *Feature) *Tracker {
-	t = new(Tracker)
-	t.Raised = []Issue
+	t := new(Tracker)
+	t.Raised = make([]Issue, 0)
 	t.Feature = f
 
 	return t
@@ -112,6 +116,11 @@ const (
 	child_oob
 )
 
-func (i Tracker) addissue(Issue) {
-	i.Issues += Issue
+func (t *Tracker) addissue(iss Issue) {
+	t.Raised = append(t.Raised, iss)
+}
+
+
+type DNA struct {
+	Seq string
 }
