@@ -8,24 +8,11 @@ import (
 	"os"
 )
 
+// Fasta reader
 type FastaRecord struct {
 	Seq string
 	Id string
 }
-
-type GffRecord struct {
-	Seqid string
-	Source string
-	Type string
-	Beg int64
-	End int64
-	Score float64
-	Strand byte
-	Phase byte
-	Id string
-	Parent []string
-}
-
 
 type fastaStatefulIterator struct {
 	scanner *bufio.Scanner
@@ -108,6 +95,21 @@ func (it *fastaStatefulIterator) Next() bool {
 		}
 		return true
 	}
+}
+
+// Gff reader
+
+type GffRecord struct {
+	Seqid string
+	Source string
+	Type string
+	Beg int64
+	End int64
+	Score float64
+	Strand byte
+	Phase byte
+	Id string
+	Parent []string
 }
 
 type gffStatefulIterator struct {
