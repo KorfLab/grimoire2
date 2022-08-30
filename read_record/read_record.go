@@ -16,7 +16,6 @@ type FastaRecord struct {
 
 type fastaStatefulIterator struct {
 	scanner *bufio.Scanner
-	linecarrier string
 	gzfh *gzip.Reader
 	idcarrier string
 	current *FastaRecord
@@ -52,49 +51,47 @@ func (it *fastaStatefulIterator) Record() *FastaRecord {
 }
 
 func (it *fastaStatefulIterator) Next() bool {
-	if it.finished {
-		it.fh.Close()
-		if it.gzfh != nil {
-			it.gzfh.Close()
-		}
-		return false
-	}
+	scanner := it.scanner
+	not_empty := true
 	seq := ""
 	id := ""
-	scanner := it.scanner
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, ">") {
-			if len(seq) > 0 {
-				if id == "" {
-					seq = it.linecarrier + seq
-					it.current = &FastaRecord{Id: it.idcarrier, Seq: seq}
+	if it.finished {
+		return false
+	}
+	for true {
+		if scanner.Scan() {
+			line := scanner.Text()
+			if strings.HasPrefix(line, ">") {
+				if len(seq) == 0 {
+					id = line[1:]
 				} else {
-					it.current = &FastaRecord{Id: id, Seq: seq}
+					if len(id) > 0 {
+						it.current = &FastaRecord{Id: id, Seq: seq}
+					} else {
+						it.current = &FastaRecord{Id: it.idcarrier, Seq: seq}
+					}
+					it.idcarrier = line[1:]
+					break
 				}
-				it.idcarrier = line[1:]
-				break
 			} else {
-				id = line[1:]
+				seq += line
 			}
 		} else {
-			seq += line
+			if len(seq) > 0 {
+				it.current = &FastaRecord{Id: it.idcarrier, Seq: seq}
+			} else {
+				not_empty = false
+			}
+			it.fh.Close()
+			if it.gzfh != nil {
+				it.gzfh.Close()
+			}
+			it.finished  = true
+			break
 		}
 	}
-	//
-	if scanner.Scan() == true {
-		it.linecarrier = scanner.Text()
-		return true
-	} else {
-		it.finished = true
-		seq = it.linecarrier + seq
-		if id != "" {
-			it.current = &FastaRecord{Id: id, Seq: seq}
-		} else {
-			it.current = &FastaRecord{Id: it.idcarrier, Seq: seq}
-		}
-		return true
-	}
+	
+	return not_empty
 }
 
 // Gff reader
