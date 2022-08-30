@@ -20,7 +20,7 @@ func main () {
 
   gffr := gffreader.Read_record(fname)
 
-  ftable := make([]classes.Feature, gffr.Linecount)
+  ftable := make([]classes.Feature, gffr.Linecount) //can you make slices smaller?
 
   for gffr.Next() {
     line := gffr.Record()
@@ -34,8 +34,8 @@ func main () {
       ftable[i].Phase = line.Phase
       ftable[i].ID = line.ID
 
-      if line.Parent != nil{
-      ftable[i].Parent = line.Parent[0]
+      if line.Parent != nil {
+        ftable[i].Parent = line.Parent[0] //try appending to make it look not hideous, time shouldnt be too bad
       }
 
       ftable[i].Len = ftable[i].End - ftable[i].Beg + 1
