@@ -163,7 +163,8 @@ func (it *gffStatefulIterator) Next() bool {
 		atts := strings.Split(fields[8], ";")
 		for _, att := range atts {
 			if strings.HasPrefix(att, "Parent=") {
-				it.current.Parent = strings.Split(att, ",")
+				parents := strings.ReplaceAll(att, "Parent=", "")
+				it.current.Parent = strings.Split(parents, ",")
 			}
 			if strings.HasPrefix(att, "ID=") {
 				it.current.Id = att	
