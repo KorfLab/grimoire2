@@ -78,7 +78,11 @@ func (it *fastaStatefulIterator) Next() bool {
 			}
 		} else {
 			if len(seq) > 0 {
-				it.current = &FastaRecord{Id: it.idcarrier, Seq: seq}
+				if len(it.idcarrier) > 0 {
+					it.current = &FastaRecord{Id: it.idcarrier, Seq: seq}
+				} else {
+					it.current = &FastaRecord{Id: id, Seq: seq}
+				}
 			} else {
 				not_empty = false
 			}
@@ -105,7 +109,7 @@ type GffRecord struct {
 	Score float64
 	Strand byte
 	Phase byte
-	Id string
+	ID string
 	Parent []string
 }
 
@@ -167,7 +171,8 @@ func (it *gffStatefulIterator) Next() bool {
 				it.current.Parent = strings.Split(parents, ",")
 			}
 			if strings.HasPrefix(att, "ID=") {
-				it.current.Id = att	
+				id := strings.ReplaceAll(att, "ID=", "")
+				it.current.ID = id
 			}
 		}
 		
