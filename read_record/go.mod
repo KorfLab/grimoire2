@@ -1,3 +1,3 @@
-module github.com/AlanAloha/read_record
+module github.com/Korflab/grimoire2/read_record
 
 go 1.18
